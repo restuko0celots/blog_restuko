@@ -1,0 +1,14 @@
+/* Resaltar usuario seleccionado en la barra lateral */
+.active-user {
+    background: #2b0054 !important;
+    border: 2px solid #ffff00 !important;
+    animation: flash 1.5s infinite;
+}
+
+.users-list a {
+    text-decoration: underline;
+}
+.users-list a:hover {
+    background: #ffff00;
+    color: #000 !important;
+}

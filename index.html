@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>★ yumeship rincon secret | by restuko ★</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <!-- INYECCIÓN DINÁMICA DEL FONDO ELEGIDO POR EL USUARIO -->
+    <style>
+        body {
+            background-image: url("{{ url_for('static', filename='imagenes/' + config.fondo) }}") !important;
+            background-repeat: repeat !important;
+            background-attachment: fixed !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header-stamp">
+        <h1>★ ~ yumeship rincon secret ~ ★</h1>
+        <div class="marquee-container">
+            <marquee scrollamount="5">⚡ EN ESTE MOMENTO ESTAMOS VIENDO EL ESPACIO DE: {{ actual | upper }} ⚡</marquee>
+        </div>
+    </header>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert-box">
+          {% for message in messages %} <p>★ {{ message }}</p> {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="main-layout">
+        
+        <!-- COLUMNA IZQUIERDA: Registro y Cambio de Configuración -->
+        <aside class="left-column">
+            <!-- Formulario de Registro con Selección de recursos inicial -->
+            <div class="pixel-box pink">
+                <h3>Crear Usuario Yume</h3>
+                <form action="/registrar" method="POST" class="retro-form">
+                    <input type="text" name="username" placeholder="Tu Nickname..." required>
+                    <input type="text" name="husbando" placeholder="Tu Husbando/Waifu..." required>
+                    <select name="tipo_yume">
+                        <option value="💕 Amor Eterno (Yume)">💕 Amor Eterno (Yume)</option>
+                        <option value="⚔️ Pareja de Combate">⚔️ Pareja de Combate</option>
+                    </select>
+                    
+                    <label><small>Elige Fondo:</small></label>
+                    <select name="fondo">
+                        {% for f in opciones.fondos %}<option value="{{ f.archivo }}">{{ f.nombre }}</option>{% endfor %}
+                    </select>
+
+                    <label><small>Elige Giga Mascot:</small></label>
+                    <select name="gif">
+                        {% for g in opciones.gifs %}<option value="{{ g.archivo }}">{{ g.nombre }}</option>{% endfor %}
+                    </select>
+
+                    <label><small>Elige Pista Musical:</small></label>
+                    <select name="musica">
+                        {% for m in opciones.musicas %}<option value="{{ m.archivo }}">{{ m.nombre }}</option>{% endfor %}
+                    </select>
+
+                    <button type="submit" class="submit-btn">¡Registrar y Aplicar! 🌟</button>
+                </form>
+            </div>
+
+            <!-- PANEL DE CONFIGURACIÓN DEL USUARIO ACTUAL -->
+            <div class="pixel-box yellow">
+                <h3>⚙️ Configuración ({{ actual }})</h3>
+                <form action="/cambiar-estilo" method="POST" class="retro-form">
+                    <label><small>Cambiar Fondo:</small></label>
+                    <select name="fondo">
+                        {% for f in opciones.fondos %}
+                        <option value="{{ f.archivo }}" {% if f.archivo == config.fondo %}selected{% endif %}>{{ f.nombre }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label><small>Cambiar Mascot:</small></label>
+                    <select name="gif">
+                        {% for g in opciones.gifs %}
+                        <option value="{{ g.archivo }}" {% if g.archivo == config.gif %}selected{% endif %}>{{ g.nombre }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label><small>Cambiar Música:</small></label>
+                    <select name="musica">
+                        {% for m in opciones.musicas %}
+                        <option value="{{ m.archivo }}" {% if m.archivo == config.musica %}selected{% endif %}>{{ m.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="submit-btn" style="background:#ff00ff; color:#fff;">Guardar Cambios 💾</button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- COLUMNA CENTRAL: Altar del personaje y Publicaciones -->
+        <main class="center-column">
+            <div class="pixel-box main-love">
+                <h2>💖 CURRENT USER SHRINE 💖</h2>
+                <div class="shrine-header text-center">
+                    <!-- MASCOTA O GIF SELECCIONADO DINÁMICAMENTE -->
+                    <img src="{{ url_for('static', filename='imagenes/' + config.gif) }}" alt="Mascota de Usuario" style="width: 110px; margin: 10px auto; display: block; border: 2px dashed #00ffcc; background:#000; padding:4px;" onerror="this.src='https://placehold.co'">
+                    <p>Estás viendo el altar de <b>{{ actual }}</b> junto a su amor ficticio: <span style="color:#ffff00; font-weight:bold;">{{ config.husbando }}</span></p>
+                    <p><small>Relación catalogada como: {{ config.tipo_yume }}</small></p>
+                </div>
+            </div>
+
+            <div class="pixel-box admin-box">
+                <h3>⚡ PUBLICAR APORTACIÓN EN EL FEED ⚡</h3>
+                <form action="/publicar" method="POST" class="retro-form">
+                    <div class="form-row">
+                        <input type="text" name="autor" value="{{ actual }}" readonly style="background:#222; color:#aaa; flex:1;">
+                        <input type="text" name="titulo" placeholder="Título de la actualización..." required style="flex:2;">
+                    </div>
+                    <textarea name="contenido" rows="3" placeholder="Escribe tus novedades o datos sobre tu personaje..." required></textarea>
+                    <button type="submit" class="publish-btn">Lanzar Publicación 🚀</button>
+                </form>
+            </div>
+
+            <div class="pixel-box blog-feed">
+                <h2>✨ COMMUNITY SHIRNE CHRONICLES ✨</h2>
+                <hr class="neon-line">
+                {% for post in posts %}
+                <article class="retro-post">
+                    <div class="post-meta">
+                        <span class="badge-cat">{{ post.categoria }}</span>
+                        <span class="post-user">By: <a href="/seleccionar-usuario/{{ post.autor }}"><b>{{ post.autor }}</b></a></span>
+                        <span class="post-date">📅 {{ post.fecha }}</span>
+                    </div>
+                    <h3>{{ post.titulo }}</h3>
+                    <p class="post-body-text">{{ post.contenido }}</p>
+                </article>
+                {% endfor %}
+            </div>
+        </main>
+
+        <!-- COLUMNA DERECHA: Lista de usuarios de la comunidad y Jukebox del perfil -->
+        <aside class="right-column">
+            <!-- JUKEBOX DEL PERFIL -->
+            <div class="pixel-box cyan text-center">
+                <h3>🎧 Perfil Jukebox 🎧</h3>
+                <p style="font-size: 0.75em; color: #ff00ff; margin-bottom: 5px;">
+                    Pista elegida por {{ actual }}:
+                </p>
+                <!-- CARGA DINÁMICA DE LA MÚSICA -->
+                <audio id="retro-audio" controls loop style="width: 100%; max-width: 190px;">
+                    <source src="{{ url_for('static', filename='musica/' + config.musica) }}" type="audio/mpeg">
+                </audio>
+                <p style="font-size: 0.6em; color: #00ffff; margin-top: 4px;">{{ config.musica }}</p>
+            </div>
+
+            <!-- DIRECTORIO DE USUARIOS PARA HACER CLIC Y VER SUS ESTILOS -->
+            <div class="pixel-box black">
+                <h3>Comunidad Yume</h3>
+                <p><small>Haz clic en un usuario para activar su música, fondo y mascota:</small></p>
+                <div class="users-list" style="margin-top: 10px;">
+                    <div class="user-card admin-card {% if actual == 'restuko' %}active-user{% endif %}">
+                        🔗 <a href="/seleccionar-usuario/restuko" style="color:#00ff00; font-weight:bold;">👑 restuko (Admin)</a>
+                    </div>
+                    {% for user, info in usuarios.items() %}
+                    {% if user != 'restuko' %}
+                    <div class="user-card {% if actual == user %}active-user{% endif %}">
+                        🔗 <a href="/seleccionar-usuario/{{ user }}" style="color:#00ffff;">{{ user }}</a>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <footer>
+        <p>© 2004-2026 yumeship rincon secret - restuko digital zone.</p>
+    </footer>
+
+</body>
+</html>
+Usa el código con precaución.3. Ajuste fino de CSS (static/style.css)Para asegurarte de resaltar qué usuario está activo dentro de la lista de la comunidad, añade este par de detalles al final de tu archivo static/style.css en Sublime Text:css/* Resaltar usuario seleccionado en la barra lateral */
+.active-user {
+    background: #2b0054 !important;
+    border: 2px solid #ffff00 !important;
+    animation: flash 1.5s infinite;
+}
+
+.users-list a {
+    text-decoration: underline;
+}
+.users-list a:hover {
+    background: #ffff00;
+    color: #000 !important;
+}
